@@ -1,0 +1,13 @@
+{
+  "name": "Swashbuckler",
+  "melee": [
+    2,
+    2,
+    2
+  ],
+  "ranged": [
+    0,
+    0,
+    0
+  ]
+}

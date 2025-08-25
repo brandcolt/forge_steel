@@ -1,0 +1,34 @@
+{
+  "name": "Patient Shot",
+  "tags": [
+    "Ranged",
+    "Strike",
+    "Weapon"
+  ],
+  "range": {
+    "ranged": 15
+  },
+  "action": "Main action",
+  "target": "One creature",
+  "stats": [
+    "M",
+    "A"
+  ],
+  "tiers": {
+    "1": {
+      "damage": 3,
+      "effects": [],
+      "rider": "If you didn’t take a move action this turn, add your chosen characteristic as extra damage"
+    },
+    "2": {
+      "damage": 6,
+      "effects": [],
+      "rider": "If you didn’t take a move action this turn, add your chosen characteristic as extra damage"
+    },
+    "3": {
+      "damage": 13,
+      "effects": [],
+      "rider": "If you didn’t take a move action this turn, add your chosen characteristic as extra damage"
+    }
+  }
+}

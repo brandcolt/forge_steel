@@ -155,7 +155,10 @@ def render_embed(state):
         arrow = "➡️ " if it["name"].lower() == cur else "• "
         stats = f"M:{it.get('M',0)} A:{it.get('A',0)} R:{it.get('R',0)} I:{it.get('I',0)} P:{it.get('P',0)}"
         extra = f"SPD:{it.get('speed',0)} SHIFT:{it.get('shift',0)} REC:{it.get('recoveries',0)}"
-        return f"{arrow}**{it['name']}** — Stamina {it.get('stamina',0)} | {stats} | {extra}"
+        # show current / max stamina (fall back to single value if max missing)
+        cur_stam = it.get('stamina', 0)
+        max_stam = it.get('max_stamina', cur_stam)
+        return f"{arrow}**{it['name']}** — Stamina {cur_stam}/{max_stam} | {stats} | {extra}"
 
     chunks = []
 

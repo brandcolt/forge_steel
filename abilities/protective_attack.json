@@ -1,0 +1,34 @@
+{
+  "name": "Protective Attack",
+  "tags": [
+    "Melee",
+    "Strike",
+    "Weapon"
+  ],
+  "range": {
+    "melee": 1
+  },
+  "action": "Main action",
+  "target": "One creature",
+  "stats": [
+    "M",
+    "A"
+  ],
+  "tiers": {
+    "1": {
+      "damage": 5,
+      "effects": [],
+      "rider": "Target is taunted until end of its next turn"
+    },
+    "2": {
+      "damage": 8,
+      "effects": [],
+      "rider": "Target is taunted until end of its next turn"
+    },
+    "3": {
+      "damage": 11,
+      "effects": [],
+      "rider": "Target is taunted until end of its next turn"
+    }
+  }
+}

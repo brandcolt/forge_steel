@@ -1,0 +1,34 @@
+{
+  "name": "Devastating Rush",
+  "tags": [
+    "Melee",
+    "Strike",
+    "Weapon"
+  ],
+  "range": {
+    "melee": 1
+  },
+  "action": "Main action",
+  "target": "One creature or object",
+  "stats": [
+    "M",
+    "A"
+  ],
+  "tiers": {
+    "1": {
+      "damage": 3,
+      "effects": [],
+      "rider": "Before the strike, move up to 3 squares straight toward the target; add squares moved as extra damage"
+    },
+    "2": {
+      "damage": 6,
+      "effects": [],
+      "rider": "Before the strike, move up to 3 squares straight toward the target; add squares moved as extra damage"
+    },
+    "3": {
+      "damage": 13,
+      "effects": [],
+      "rider": "Before the strike, move up to 3 squares straight toward the target; add squares moved as extra damage"
+    }
+  }
+}

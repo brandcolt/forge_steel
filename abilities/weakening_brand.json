@@ -1,0 +1,37 @@
+{
+  "name": "Weakening Brand",
+  "tags": [
+    "Magic",
+    "Melee",
+    "Strike",
+    "Weapon"
+  ],
+  "range": {
+    "melee": 1
+  },
+  "action": "Main action",
+  "target": "One creature or object",
+  "stats": [
+    "M",
+    "R",
+    "I",
+    "P"
+  ],
+  "tiers": {
+    "1": {
+      "damage": 3,
+      "effects": [],
+      "rider": "Until end of its next turn, target has damage weakness equal to the characteristic used"
+    },
+    "2": {
+      "damage": 5,
+      "effects": [],
+      "rider": "Until end of its next turn, target has damage weakness equal to the characteristic used"
+    },
+    "3": {
+      "damage": 8,
+      "effects": [],
+      "rider": "Until end of its next turn, target has damage weakness equal to the characteristic used"
+    }
+  }
+}

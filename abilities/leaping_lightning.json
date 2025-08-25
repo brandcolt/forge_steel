@@ -1,0 +1,37 @@
+{
+  "name": "Leaping Lightning",
+  "tags": [
+    "Magic",
+    "Melee",
+    "Strike",
+    "Weapon"
+  ],
+  "range": {
+    "melee": 1
+  },
+  "action": "Main action",
+  "target": "One creature or object",
+  "stats": [
+    "M",
+    "R",
+    "I",
+    "P"
+  ],
+  "tiers": {
+    "1": {
+      "damage": 5,
+      "effects": [],
+      "rider": "Also deal lightning damage to a creature/object within 2 squares equal to the characteristic used"
+    },
+    "2": {
+      "damage": 8,
+      "effects": [],
+      "rider": "Also deal lightning damage to a creature/object within 2 squares equal to the characteristic used"
+    },
+    "3": {
+      "damage": 11,
+      "effects": [],
+      "rider": "Also deal lightning damage to a creature/object within 2 squares equal to the characteristic used"
+    }
+  }
+}

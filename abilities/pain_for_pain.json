@@ -1,0 +1,34 @@
+{
+  "name": "Pain for Pain",
+  "tags": [
+    "Melee",
+    "Strike",
+    "Weapon"
+  ],
+  "range": {
+    "melee": 1
+  },
+  "action": "Main action",
+  "target": "One creature",
+  "stats": [
+    "M",
+    "A"
+  ],
+  "tiers": {
+    "1": {
+      "damage": 3,
+      "effects": [],
+      "rider": "If the target damaged you since the end of your last turn, add your chosen characteristic as extra damage"
+    },
+    "2": {
+      "damage": 5,
+      "effects": [],
+      "rider": "If the target damaged you since the end of your last turn, add your chosen characteristic as extra damage"
+    },
+    "3": {
+      "damage": 13,
+      "effects": [],
+      "rider": "If the target damaged you since the end of your last turn, add your chosen characteristic as extra damage"
+    }
+  }
+}

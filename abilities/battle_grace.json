@@ -1,0 +1,34 @@
+{
+  "name": "Battle Grace",
+  "tags": [
+    "Melee",
+    "Strike",
+    "Weapon"
+  ],
+  "range": {
+    "melee": 1
+  },
+  "action": "Main action",
+  "target": "One creature",
+  "stats": [
+    "M",
+    "A"
+  ],
+  "tiers": {
+    "1": {
+      "damage": 5,
+      "effects": [],
+      "rider": "You and the target can swap places; if you can’t, target takes +1 damage"
+    },
+    "2": {
+      "damage": 8,
+      "effects": [],
+      "rider": "You and the target can swap places; if you can’t, target takes +1 damage"
+    },
+    "3": {
+      "damage": 11,
+      "effects": [],
+      "rider": "You and the target can swap places; if you can’t, target takes +1 damage"
+    }
+  }
+}

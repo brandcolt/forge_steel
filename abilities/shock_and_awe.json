@@ -1,0 +1,36 @@
+{
+  "name": "Shock and Awe",
+  "tags": [
+    "Melee",
+    "Ranged",
+    "Strike",
+    "Weapon"
+  ],
+  "range": {
+    "melee": 1,
+    "ranged": 10
+  },
+  "action": "Main action",
+  "target": "One creature",
+  "stats": [
+    "M",
+    "A"
+  ],
+  "tiers": {
+    "1": {
+      "damage": 3,
+      "effects": [],
+      "rider": "Target takes a bane on its next power roll (before end of next turn)"
+    },
+    "2": {
+      "damage": 6,
+      "effects": [],
+      "rider": "Target takes a bane on its next power roll (before end of next turn)"
+    },
+    "3": {
+      "damage": 8,
+      "effects": [],
+      "rider": "Target takes a bane on its next power roll (before end of next turn)"
+    }
+  }
+}

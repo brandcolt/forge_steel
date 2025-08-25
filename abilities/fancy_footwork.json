@@ -1,0 +1,34 @@
+{
+  "name": "Fancy Footwork",
+  "tags": [
+    "Melee",
+    "Strike",
+    "Weapon"
+  ],
+  "range": {
+    "melee": 1
+  },
+  "action": "Main action",
+  "target": "One creature",
+  "stats": [
+    "M",
+    "A"
+  ],
+  "tiers": {
+    "1": {
+      "damage": 5,
+      "effects": [],
+      "rider": null
+    },
+    "2": {
+      "damage": 7,
+      "effects": [],
+      "rider": "Push the target 1; after the push you can shift into a square they left"
+    },
+    "3": {
+      "damage": 10,
+      "effects": [],
+      "rider": "Push the target 2; after the push you can shift into a square they left"
+    }
+  }
+}
