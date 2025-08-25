@@ -1,0 +1,5 @@
+{
+  "name": "Longbow",
+  "melee": [0, 0, 0],
+  "ranged": [1, 1, 1]
+}

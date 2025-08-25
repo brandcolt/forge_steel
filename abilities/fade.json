@@ -1,0 +1,22 @@
+{
+  "name": "Fade",
+  "tags": ["Melee", "Ranged", "Strike", "Weapon"],
+  "action": "Main",
+  "target": "One creature",
+  "stats": ["M", "A"],
+
+  "tiers": {
+    "1": {
+      "damage": 3,
+      "effects": ["Shift 1 square"]
+    },
+    "2": {
+      "damage": 6,
+      "effects": ["Shift up to 2 squares"]
+    },
+    "3": {
+      "damage": 8,
+      "effects": ["Shift up to 3 squares"]
+    }
+  }
+}

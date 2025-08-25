@@ -1,0 +1,23 @@
+{
+  "name": "Exploding Arrow",
+  "tags": ["Magic", "Ranged", "Strike", "Weapon"],
+  "range": "Ranged 15",
+  "target": "One creature or object",
+  "action": "Main",
+  "stats": ["A", "R", "I", "P"],
+  "tiers": {
+    "1": {
+      "damage": 5,
+      "effects": ["Fire damage"]
+    },
+    "2": {
+      "damage": 7,
+      "effects": ["Fire damage"]
+    },
+    "3": {
+      "damage": 10,
+      "effects": ["Fire damage"]
+    }
+  },
+  "extra_effect": "One creature or object of your choice within 2 squares of the target takes fire damage equal to the characteristic score used for this ability’s power roll."
+}

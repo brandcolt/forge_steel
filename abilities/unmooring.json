@@ -1,0 +1,15 @@
+{
+  "name": "Unmooring",
+  "tags": ["Melee", "Psionic", "Strike", "Weapon"],
+  "range": { "melee": 1 },
+  "action": "Main action",
+  "target": "One creature",
+  "stats": ["M", "R", "I", "P"],
+  "tiers": {
+    "1": { "damage": 5,  "effects": [] },
+    "2": { "damage": 8,  "effects": [] },
+    "3": { "damage": 11, "effects": [] }
+  },
+  "extra_effect": "Until the end of the target’s next turn, any forced movement that affects the target has its distance increased by 2.",
+  "notes": "Damage = base + chosen stat. Apply kit bonuses (melee) by tier."
+}
