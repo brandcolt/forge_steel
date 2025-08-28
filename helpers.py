@@ -146,41 +146,114 @@ def render_embed(state):
 
     cur = (state.get("current") or "").lower()
 
+    # Heroes (ready/done) unaffected
     heroes_ready   = [it for it in state["entries"] if it.get("is_player", True) and it.get("status","ready") == "ready"]
-    monsters_ready = [it for it in state["entries"] if not it.get("is_player", True) and it.get("status","ready") == "ready"]
     heroes_done    = [it for it in state["entries"] if it.get("is_player", True) and it.get("status","ready") == "done"]
-    monsters_done  = [it for it in state["entries"] if not it.get("is_player", True) and it.get("status","ready") == "done"]
+
+    # Monsters split into groups + ungrouped
+    monsters = [it for it in state["entries"] if not it.get("is_player", True)]
+    # gather group order: explicit state list first, then any groups discovered
+    group_order = list(dict.fromkeys(state.get("monster_groups", []) + [it.get("group") for it in monsters if it.get("group")]))
 
     def line(it):
         arrow = "➡️ " if it["name"].lower() == cur else "• "
-        stats = f"M:{it.get('M',0)} A:{it.get('A',0)} R:{it.get('R',0)} I:{it.get('I',0)} P:{it.get('P',0)}"
+        stats = f"M:{it.get('M',0)} A:{it.get('A',0)} R:{it.get('R',0)} I:{it.get('I',0)} P:{it.get('P',0)} STA:{it.get('STA',0)}"
         extra = f"SPD:{it.get('speed',0)} SHIFT:{it.get('shift',0)} REC:{it.get('recoveries',0)}"
-        # show current / max stamina (fall back to single value if max missing)
         cur_stam = it.get('stamina', 0)
         max_stam = it.get('max_stamina', cur_stam)
         return f"{arrow}**{it['name']}** — Stamina {cur_stam}/{max_stam} | {stats} | {extra}"
 
     chunks = []
 
-    if heroes_ready or monsters_ready:
-        if heroes_ready:
-            chunks.append("__**Heroes**__")
-            chunks += [line(it) for it in heroes_ready]
-            chunks.append("")
-        if monsters_ready:
-            chunks.append("__**Monsters**__")
-            chunks += [line(it) for it in monsters_ready]
-            chunks.append("")
+    # Heroes ready
+    if heroes_ready:
+        chunks.append("__**Heroes**__")
+        chunks += [line(it) for it in heroes_ready]
+        chunks.append("")
 
-    if heroes_done or monsters_done:
+    # Monsters: render grouped ready members and ungrouped ready members
+    monsters_ready_lines = []
+    monsters_done_lines = []
+
+    # process groups in group_order
+    seen_group_members = set()
+    for g in group_order:
+        if not g:
+            continue
+        members = [m for m in monsters if m.get("group") == g]
+        if not members:
+            continue
+        seen_group_members.update(m['name'] for m in members)
+        ready_members = [m for m in members if m.get("status","ready") == "ready"]
+        done_members  = [m for m in members if m.get("status","ready") == "done"]
+        # If any ready members exist, show the group header and the ready members under Monsters
+        if ready_members:
+            monsters_ready_lines.append(f"__**{g} ({len(ready_members)})**__")
+            monsters_ready_lines += [line(m) for m in ready_members]
+            monsters_ready_lines.append("")
+        # If no ready members but done_members exist -> entire group is in Turn Over; will be rendered later grouped
+        # If mixed (some done, some ready) the done ones will be shown individually in Turn Over section.
+
+    # ungrouped monsters (ready / done)
+    ungrouped_ready = [m for m in monsters if not m.get("group") and m.get("status","ready") == "ready"]
+    ungrouped_done  = [m for m in monsters if not m.get("group") and m.get("status","ready") == "done"]
+
+    if monsters_ready_lines or ungrouped_ready:
+        chunks.append("__**Monsters**__")
+        if monsters_ready_lines:
+            chunks += monsters_ready_lines
+        if ungrouped_ready:
+            chunks += [line(m) for m in ungrouped_ready]
+            chunks.append("")
+        # ensure a blank line after Monsters section
+        chunks.append("")
+
+    # Turn Over: heroes done + grouped done + ungrouped done + any individually-done members from mixed groups
+    if heroes_done or any(True for g in group_order if (
+            # group is "fully done" -> include as grouped
+            [m for m in monsters if m.get("group")==g and m.get("status","ready")=="done"] and
+            not [m for m in monsters if m.get("group")==g and m.get("status","ready")=="ready"]
+        )) or ungrouped_done:
         chunks.append("__**Turn Over**__")
+
+        # heroes done
         if heroes_done:
             chunks.append("_Heroes_")
             chunks += [line(it) for it in heroes_done]
             chunks.append("")
-        if monsters_done:
+
+        # fully-done groups (show as grouped)
+        for g in group_order:
+            if not g:
+                continue
+            members = [m for m in monsters if m.get("group")==g]
+            if not members:
+                continue
+            ready_members = [m for m in members if m.get("status","ready") == "ready"]
+            done_members  = [m for m in members if m.get("status","ready") == "done"]
+            if done_members and not ready_members:
+                chunks.append(f"__**{g} ({len(done_members)})**__")
+                chunks += [line(m) for m in done_members]
+                chunks.append("")
+
+        # individually done monsters from mixed groups: show under Turn Over but not grouped
+        mixed_done = []
+        for g in group_order:
+            members = [m for m in monsters if m.get("group")==g]
+            if not members:
+                continue
+            ready_members = [m for m in members if m.get("status","ready") == "ready"]
+            done_members = [m for m in members if m.get("status","ready") == "done"]
+            if ready_members and done_members:
+                mixed_done += done_members
+        if mixed_done:
+            chunks += [line(m) for m in mixed_done]
+            chunks.append("")
+
+        # ungrouped done monsters
+        if ungrouped_done:
             chunks.append("_Monsters_")
-            chunks += [line(it) for it in monsters_done]
+            chunks += [line(m) for m in ungrouped_done]
             chunks.append("")
 
     e.description = "\n".join(chunks) if chunks else "_No combatants._"
@@ -207,3 +280,15 @@ async def ac_ability(ctx: discord.AutocompleteContext):
     if q:
         names = [n for n in names if q in n.lower()]
     return names[:25]
+
+async def ac_group(ctx: discord.AutocompleteContext):
+    # list groups present in this channel's tracker + any registered names
+    try:
+        _, state = await load_state(ctx.interaction.channel)
+    except Exception:
+        return []
+    groups = list(dict.fromkeys(state.get("monster_groups", []) + [e.get("group") for e in state.get("entries", []) if e.get("group")]))
+    q = (ctx.value or "").lower()
+    if q:
+        groups = [g for g in groups if g and q in g.lower()]
+    return [g for g in (groups or [])][:25]

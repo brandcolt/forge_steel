@@ -39,8 +39,27 @@ from cogs import InitCog, DSCog
 # ───────────────────────── Events ───────────────────────── #
 @bot.event
 async def on_ready():
-    await bot.sync_commands(force=True)
-    print(f"Logged in as {bot.user} (commands synced)")
+    print(f"Logged in as {bot.user} (commands may still propagate)")
+    tree = getattr(bot, "tree", None)
+    if tree is not None:
+        try:
+            names = [c.name for c in tree.get_commands()]
+        except Exception:
+            names = []
+        print("Registered application commands:", names)
+    else:
+        print("No command tree available on this Bot instance; skipping registered-commands listing.")
+
+    # optional: force-sync to a dev guild for instant updates (set DEV_GUILD in config.ini)
+    # try:
+    #     dev_guild = int(os.environ.get("DEV_GUILD") or config.get("discord","dev_guild","fallback","0") or 0) or None
+    # except Exception:
+    #     dev_guild = None
+    # if dev_guild:
+    #     await bot.sync_commands(guild=discord.Object(id=dev_guild), force=True)
+    #     print("Synced commands to dev guild", dev_guild)
+    # else:
+    #     await bot.sync_commands(force=True)
 
 def setup_bot():
     bot.add_cog(InitCog(bot))

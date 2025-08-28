@@ -18,17 +18,17 @@
     "1": {
       "damage": 3,
       "effects": [],
-      "rider": "A <WEAK>, slowed (save ends)"
+      "rider": "A \\<WEAK\\>, slowed (save ends)"
     },
     "2": {
       "damage": 5,
       "effects": [],
-      "rider": "A <AVERAGE>, slowed (save ends)"
+      "rider": "A \\<AVERAGE\\>, slowed (save ends)"
     },
     "3": {
       "damage": 7,
       "effects": [],
-      "rider": "A <STRONG>, slowed (save ends)"
+      "rider": "A \\<STRONG\\>, slowed (save ends)"
     }
   }
 }

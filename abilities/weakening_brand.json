@@ -21,17 +21,17 @@
     "1": {
       "damage": 3,
       "effects": [],
-      "rider": "Until end of its next turn, target has damage weakness equal to the characteristic used"
+      "rider": "Until EoT, target has damage weakness equal to the characteristic used"
     },
     "2": {
       "damage": 5,
       "effects": [],
-      "rider": "Until end of its next turn, target has damage weakness equal to the characteristic used"
+      "rider": "Until EoT, target has damage weakness equal to the characteristic used"
     },
     "3": {
       "damage": 8,
       "effects": [],
-      "rider": "Until end of its next turn, target has damage weakness equal to the characteristic used"
+      "rider": "Until EoT, target has damage weakness equal to the characteristic used"
     }
   }
 }

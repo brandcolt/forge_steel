@@ -6,14 +6,11 @@
     "Weapon"
   ],
   "range": {
-    "melee": 1
+    "melee": 2
   },
   "action": "Main action",
-  "target": "One creature",
-  "stats": [
-    "M",
-    "A"
-  ],
+  "target": "Two creatures or objects",
+  "stats": [],
   "tiers": {
     "1": {
       "damage": 4,

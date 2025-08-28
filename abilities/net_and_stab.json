@@ -18,17 +18,18 @@
     "1": {
       "damage": 4,
       "effects": [],
-      "rider": "Target slowed until end of its next turn"
+      "rider": "A \\<WEAK\\>, slowed (EoT)"
     },
     "2": {
       "damage": 6,
       "effects": [],
-      "rider": "Target slowed until end of its next turn"
+      "rider": "A \\<AVERAGE\\>, slowed (EoT)"
     },
     "3": {
       "damage": 8,
       "effects": [],
-      "rider": "Target restrained until end of its next turn"
+      "rider": "A \\<STRONG\\>, restrained (EoT)"
     }
-  }
+  },
+  "flavor": "The well-thrown net that follows your main attack leaves your foes right where you want them."
 }

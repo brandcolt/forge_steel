@@ -1,15 +1,15 @@
 {
   "name": "Two Shot",
   "tags": [
-    "Melee",
+    "Ranged",
     "Strike",
     "Weapon"
   ],
   "range": {
-    "melee": 1
+    "ranged": 12
   },
   "action": "Main action",
-  "target": "One creature",
+  "target": "Two creatures or objects",
   "stats": [
     "M",
     "A"

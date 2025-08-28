@@ -18,17 +18,17 @@
     "1": {
       "damage": 3,
       "effects": [],
-      "rider": "If you didn’t take a move action this turn, add your chosen characteristic as extra damage"
+      "rider": "If you didn’t move this turn, add your chosen characteristic as extra damage"
     },
     "2": {
       "damage": 6,
       "effects": [],
-      "rider": "If you didn’t take a move action this turn, add your chosen characteristic as extra damage"
+      "rider": "If you didn’t move this turn, add your chosen characteristic as extra damage"
     },
     "3": {
       "damage": 13,
       "effects": [],
-      "rider": "If you didn’t take a move action this turn, add your chosen characteristic as extra damage"
+      "rider": "If you didn’t move this turn, add your chosen characteristic as extra damage"
     }
   }
 }

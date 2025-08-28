@@ -9,7 +9,7 @@
     "melee": 1
   },
   "action": "Main action",
-  "target": "One creature",
+  "target": "Two creatures or objects",
   "stats": [
     "M",
     "A"

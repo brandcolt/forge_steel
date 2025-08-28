@@ -18,17 +18,17 @@
     "1": {
       "damage": 5,
       "effects": [],
-      "rider": "Target is taunted until end of its next turn"
+      "rider": "Target is taunted (EoT)"
     },
     "2": {
       "damage": 8,
       "effects": [],
-      "rider": "Target is taunted until end of its next turn"
+      "rider": "Target is taunted (EoT)"
     },
     "3": {
       "damage": 11,
       "effects": [],
-      "rider": "Target is taunted until end of its next turn"
+      "rider": "Target is taunted (EoT)"
     }
   }
 }

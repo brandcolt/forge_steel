@@ -5,7 +5,7 @@ from discord import option
 # Import helpers from bot (bot.py defines these before importing this module)
 from helpers import (
     load_state, save_state, render_embed,
-    ac_kit, ac_character, list_character_names_in_channel,
+    ac_kit, ac_character, ac_group, list_character_names_in_channel,
     list_ability_names, load_ability, load_kit,
     get_char, parse_three_space_numbers, eval_dice_expr
 )
@@ -17,6 +17,7 @@ class InitCog(commands.Cog):
     @discord.slash_command(description="Add a Draw Steel character to the tracker")
     @option("name", str)
     @option("stamina", int, description="Stamina")
+    @option("stability", int, description="Stability (STA)")
     @option("m", int, description="Might")
     @option("a", int, description="Agility")
     @option("r", int, description="Reason")
@@ -29,22 +30,20 @@ class InitCog(commands.Cog):
     @option("kit_melee", str, description="Melee kit bonuses (e.g. '1 2 2')", required=False, default="0 0 0")
     @option("kit_ranged", str, description="Ranged kit bonuses (e.g. '1 1 1')", required=False, default="0 0 0")
     @option("is_player", bool, default=True)
+    @option("group", str, required=False, description="Monster initiative group (enemies only)", autocomplete=ac_group)
     async def init_add(
-        self, ctx, name: str, stamina: int, m: int, a: int, r: int, i: int, p: int,
+        self, ctx, name: str, stamina: int, stability: int, m: int, a: int, r: int, i: int, p: int,
         speed: int, shift: int, recoveries: int,
         kit: str = None, kit_melee: str = "0 0 0", kit_ranged: str = "0 0 0",
-        is_player: bool = True
+        is_player: bool = True, group: str = None
     ):
+        # defer immediately to avoid "Unknown interaction" if work takes >3s
+        await ctx.defer()
         msg, state = await load_state(ctx.channel)
 
-        # Enforce: either choose a kit, or enter custom arrays — not both.
-        custom_melee = (kit_melee.strip() != "0 0 0")
-        custom_ranged = (kit_ranged.strip() != "0 0 0")
-        using_custom = custom_melee or custom_ranged
-        using_named  = bool(kit and kit.strip())
-
-        if using_named and using_custom:
-            await ctx.respond("Pick **either** a Kit **or** custom bonuses — not both. Clear the custom fields or remove the kit.", ephemeral=True)
+        # enforce groups for monsters only
+        if group and is_player:
+            await ctx.respond("Groups are for monsters only — set `is_player` to false to assign a group.", ephemeral=True)
             return
 
         # Resolve kit arrays
@@ -52,7 +51,13 @@ class InitCog(commands.Cog):
         kit_ranged_arr = [0,0,0]
         kit_name = None
 
-        if using_named:
+        if group and group.strip():
+            group = group.strip()
+            state.setdefault("monster_groups", [])
+            if group not in state["monster_groups"]:
+                state["monster_groups"].append(group)
+
+        if kit and kit.strip():
             data = load_kit(kit)
             if not data:
                 await ctx.respond(f"Kit **{kit}** not found in `/kits`.", ephemeral=True)
@@ -71,6 +76,7 @@ class InitCog(commands.Cog):
             # store both current and max stamina (current starts equal to max)
             "stamina": int(stamina),
             "max_stamina": int(stamina),
+            "STA": int(stability),
             "M": int(m), "A": int(a), "R": int(r), "I": int(i), "P": int(p),
             "speed": int(speed), "shift": int(shift), "recoveries": int(recoveries),
             "kit": kit_name,
@@ -78,7 +84,15 @@ class InitCog(commands.Cog):
             "kit_ranged": kit_ranged_arr,
             "is_player": bool(is_player),
             "status": "ready",
+            "group": group or None,
         }
+
+        # ensure group is registered in ordering list
+        if group:
+            state.setdefault("monster_groups", [])
+            if group not in state["monster_groups"]:
+                state["monster_groups"].append(group)
+
         idx = next((ix for ix,e in enumerate(state["entries"]) if e["name"].lower()==name.lower()), None)
         if idx is not None:
             state["entries"][idx] = entry
@@ -92,7 +106,7 @@ class InitCog(commands.Cog):
     @discord.slash_command(description="Update a single field on a character in the tracker")
     @option("name", str, description="Existing character name", autocomplete=ac_character)
     @option("field", str, description="Which field to update",
-            choices=["name","stamina","max_stamina","M","A","R","I","P","speed","shift","recoveries","kit_melee","kit_ranged","is_player"])
+            choices=["name","stamina","max_stamina","group","STA","M","A","R","I","P","speed","shift","recoveries","kit_melee","kit_ranged","is_player"])
     @option("value", str, description="New value (e.g. '27' or '1 2 2' or 'true')")  
     async def init_update(self, ctx, name: str, field: str, value: str):
         msg, state = await load_state(ctx.channel)
@@ -103,7 +117,7 @@ class InitCog(commands.Cog):
 
         entry = state["entries"][idx]
         try:
-            if field in ["stamina","max_stamina","M","A","R","I","P","speed","shift","recoveries"]:
+            if field in ["stamina","max_stamina","group","STA","M","A","R","I","P","speed","shift","recoveries"]:
                 if field == "stamina":
                     entry["stamina"] = int(value)
                     if "max_stamina" in entry:
@@ -112,6 +126,17 @@ class InitCog(commands.Cog):
                     new_max = int(value)
                     entry["max_stamina"] = new_max
                     entry["stamina"] = max(0, min(int(entry.get("stamina", new_max)), new_max))
+                elif field == "group":
+                    new_group = value.strip() or None
+                    if entry.get("is_player", True) and new_group:
+                        await ctx.respond("Cannot assign a group to a player.", ephemeral=True); return
+                    entry["group"] = new_group
+                    if new_group:
+                        state.setdefault("monster_groups", [])
+                        if new_group not in state["monster_groups"]:
+                            state["monster_groups"].append(new_group)
+                elif field == "STA":
+                    entry["STA"] = int(value)
                 else:
                     entry[field] = int(value)
             elif field in ["kit_melee","kit_ranged"]:
@@ -310,9 +335,11 @@ class DSCog(commands.Cog):
 
         cur_stam = entry.get("stamina", 0)
         max_stam = entry.get("max_stamina", cur_stam)
+        stab = entry.get("STA", 0)
 
         e = discord.Embed(title=f"📜 {entry['name']} — {role}", color=0x00AAFF)
         e.add_field(name="Stamina", value=f"{cur_stam}/{max_stam}", inline=True)
+        e.add_field(name="Stability (STA)", value=str(stab), inline=True)
         e.add_field(name="Speed / Shift / Rec", value=f"{entry.get('speed',0)} / {entry.get('shift',0)} / {entry.get('recoveries',0)}", inline=True)
         e.add_field(
             name="Stats",
@@ -416,6 +443,41 @@ class DSCog(commands.Cog):
         await ctx.respond(embed=e)
         await ctx.interaction.followup.send(embed=render_embed(state))
 
+    # ---------------- Heal command ----------------
+    @discord.slash_command(description="Heal a character in the tracker (cannot exceed max_stamina)")
+    @option("target", str, autocomplete=_auto_character)
+    @option("amount", int, description="Healing amount (positive integer)")
+    async def ds_heal(self, ctx, target: str, amount: int):
+        
+        # Handle if healing amount is negative
+        if amount < 0:
+            await ctx.respond("Amount must be a positive integer.", ephemeral=True)
+            return
+
+        # Load state and find target
+        msg, state = await load_state(ctx.channel)
+        target_entry = get_char(state, target)
+        if not target_entry:
+            await ctx.respond(f"Target **{target}** not found in this channel’s tracker.", ephemeral=True)
+            return
+
+        cur = int(target_entry.get("stamina", 0))
+        max_stam = int(target_entry.get("max_stamina", cur))
+        new = min(max_stam, cur + int(amount))
+        target_entry["stamina"] = new
+        if "max_stamina" not in target_entry:
+            target_entry["max_stamina"] = max_stam
+
+        await save_state(msg, state)
+
+        # Repastes the tracker to show updated stamina
+        e = discord.Embed(title="🩹 Healing Applied", color=0x2ECC71)
+        e.add_field(name="Target", value=f"**{target_entry['name']}**", inline=True)
+        e.add_field(name="Healed", value=str(amount), inline=True)
+        e.add_field(name="Stamina", value=f"{new}/{target_entry.get('max_stamina', new)}", inline=False)
+        await ctx.respond(embed=e)
+        await ctx.interaction.followup.send(embed=render_embed(state))
+
     # ---------------- Use Ability (loads JSON, applies kit bonuses, edges/banes) ----------------
     @discord.slash_command(description="Use a Draw Steel ability from /abilities (applies kit bonuses)")
     @option("character", str, description="Character name in this channel's tracker", autocomplete=_auto_character)
@@ -427,6 +489,7 @@ class DSCog(commands.Cog):
     @option("target",    str, required=False, description="Target character to apply damage to", autocomplete=_auto_character)
     async def ds_use_ability(self, ctx, character: str, ability: str, mode: str,
                              stat: str = "Auto", edges: int = 0, banes: int = 0, target: str = None):
+        # load tracker & character
         msg, state = await load_state(ctx.channel)
         entry = get_char(state, character)
         if not entry:
@@ -438,16 +501,34 @@ class DSCog(commands.Cog):
             await ctx.respond(f"Ability **{ability}** not found in `/abilities`.", ephemeral=True)
             return
 
+        # top-level metadata
+        tags = ability_data.get("tags", [])
+        range_info = ability_data.get("range")
+        action_text = ability_data.get("action")
+        ability_target = ability_data.get("target")
         allowed_stats = [s.upper() for s in ability_data.get("stats", [])]
+
+        # determine stat to use
         if stat != "Auto":
             chosen_stat_key = stat.upper()
         else:
-            chosen_stat_key = next((s for s in allowed_stats if s in entry), allowed_stats[0] if allowed_stats else "M")
-        stat_value = int(entry.get(chosen_stat_key, 0))
+            # prefer ability's allowed stats if present, otherwise pick character's highest stat
+            candidates = ["M", "A", "R", "I", "P"]
+            if allowed_stats:
+                # limit candidates to allowed_stats intersection (preserve order of candidates)
+                candidates = [c for c in candidates if c in allowed_stats]
+                if not candidates:
+                    candidates = allowed_stats
+            # pick highest stat value from entry
+            chosen_stat_key = max(candidates, key=lambda k: int(entry.get(k, 0) or 0))
 
+        stat_value = int(entry.get(chosen_stat_key, 0) or 0)
+
+        # roll
         d1, d2 = random.randint(1, 10), random.randint(1, 10)
         base_total = d1 + d2 + stat_value
 
+        # edges/banes handling
         numeric_mod = 0
         tier_adjust = 0
         if edges == 1 and banes == 0:
@@ -461,6 +542,7 @@ class DSCog(commands.Cog):
 
         total = base_total + numeric_mod
 
+        # determine base tier and apply tier_adjust
         if total <= 11:
             tier = 1
         elif total <= 16:
@@ -469,21 +551,40 @@ class DSCog(commands.Cog):
             tier = 3
         original_tier = tier
         tier = max(1, min(3, tier + tier_adjust))
-
         tkey = str(tier)
+
         tier_block = ability_data.get("tiers", {}).get(tkey, {})
         base_damage = int(tier_block.get("damage", 0))
         effects = tier_block.get("effects", [])
+        rider = tier_block.get("rider") or tier_block.get("rider_text") or None
 
+        # kit bonus
         kit_array = entry.get("kit_melee" if mode == "Melee" else "kit_ranged", [0, 0, 0])
         kit_bonus = int(kit_array[tier - 1]) if len(kit_array) >= tier else 0
 
         total_damage = base_damage + stat_value + kit_bonus
 
+        # embed
         color = 0xE74C3C if tier == 1 else (0x2ECC71 if tier == 2 else 0xF1C40F)
         title = ability_data.get("name", ability)
         e = discord.Embed(title=f"✨ {title}", color=color)
 
+        if tags:
+            e.add_field(name="Tags", value=", ".join(map(str, tags)), inline=True)
+        if range_info:
+            if isinstance(range_info, dict):
+                range_parts = [f"{k}: {v}" for k, v in range_info.items()]
+                e.add_field(name="Range", value="; ".join(range_parts), inline=True)
+            else:
+                e.add_field(name="Range", value=str(range_info), inline=True)
+        if action_text:
+            e.add_field(name="Action", value=str(action_text), inline=True)
+        if ability_target:
+            e.add_field(name="Ability Target", value=str(ability_target), inline=True)
+        if allowed_stats:
+            e.add_field(name="Allowed Stats", value=", ".join(allowed_stats), inline=False)
+
+        # roll breakdown
         parts = [f"{d1}", f"{d2}", f"{stat_value}({chosen_stat_key})"]
         if numeric_mod:
             sign = "+" if numeric_mod > 0 else ""
@@ -503,8 +604,12 @@ class DSCog(commands.Cog):
             value=f"{base_damage} + {stat_value} (stat) + {kit_bonus} (kit) = **{total_damage}**",
             inline=True,
         )
+
         if effects:
             e.add_field(name="Effects", value="\n".join(effects), inline=False)
+
+        if rider:
+            e.add_field(name="Rider", value=str(rider), inline=False)
 
         extra_note = ability_data.get("extra_effect")
         if extra_note:
@@ -530,3 +635,26 @@ class DSCog(commands.Cog):
             return
 
         await ctx.respond(embed=e)
+
+    # ---------------- Remove Character ----------------
+    @discord.slash_command(description="Remove a character from the tracker")
+    @option("character", str, autocomplete=_auto_character)
+    async def ds_remove(self, ctx, character: str):
+        msg, state = await load_state(ctx.channel)
+        idx = next((ix for ix,e in enumerate(state["entries"]) if e["name"].lower() == character.lower()), None)
+        if idx is None:
+            await ctx.respond(f"Character **{character}** not found.", ephemeral=True)
+            return
+
+        removed = state["entries"].pop(idx)
+        # If active index pointed past end, clamp it
+        if state.get("active", 0) >= len(state["entries"]):
+            state["active"] = max(0, len(state["entries"]) - 1)
+        await save_state(msg, state)
+
+        e = discord.Embed(title="🗑️ Removed", color=0xE74C3C)
+        e.add_field(name="Removed", value=f"**{removed['name']}**", inline=True)
+        e.add_field(name="Remaining", value=f"{len(state['entries'])} combatant(s)", inline=True)
+        await ctx.respond(embed=e)
+        # show updated tracker as followup
+        await ctx.interaction.followup.send(embed=render_embed(state))
