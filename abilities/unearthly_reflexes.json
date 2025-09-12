@@ -1,0 +1,15 @@
+{
+  "name": "Unearthly Reflexes",
+  "tags": [
+    "-"
+  ],
+  "action": "Main action",
+  "range": {
+    "self": true
+  },
+  "target": "Self",
+  "flavor": "You are as elusive as a hummingbird.",
+  "stats": [],
+  "tiers": {},
+  "extra_effect": "- effect: You take half the damage from the triggering effect and can shift up to\n      a number of squares equal to your Agility score."
+}

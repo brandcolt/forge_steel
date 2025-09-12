@@ -1,0 +1,39 @@
+{
+  "name": "Hammer and Anvil",
+  "tags": [
+    "Melee",
+    "Ranged",
+    "Strike",
+    "Weapon"
+  ],
+  "action": "Main Action",
+  "range": {
+    "melee": 1,
+    "ranged": 5
+  },
+  "target": "One creature or object",
+  "flavor": "Let''s not argue about who''s the hammer and who''s the anvil!",
+  "stats": [],
+  "tiers": {
+    "1": {
+      "damage": 5,
+      "effects": [],
+      "rider": "one ally within 10 squares of you can use a strike signature"
+    },
+    "2": {
+      "damage": 9,
+      "effects": [],
+      "rider": "one ally within 10 squares of you can use a strike signature"
+    },
+    "3": {
+      "damage": 12,
+      "effects": [],
+      "rider": "two allies within 10 squares of you can each use a strike"
+    }
+  },
+  "cost": {
+    "resource": "Focus",
+    "amount": 5
+  },
+  "extra_effect": "- roll: Power Roll + Might\n    t1: 5 + M damage; one ally within 10 squares of you can use a strike signature\n      ability against the target as a free triggered action\n    t2: 9 + M damage; one ally within 10 squares of you can use a strike signature\n      ability that gains an edge against the target as a free triggered action\n    t3: 12 + M damage; two allies within 10 squares of you can each use a strike\n      signature ability that gains an edge against the target as a free\n      triggered action\n  - effect: If the target is reduced to 0 Stamina before one or both chosen allies\n      has made their strike, the ally or allies can pick a different target."
+}

@@ -5,30 +5,29 @@
     "Strike",
     "Weapon"
   ],
+  "action": "Main action",
   "range": {
     "ranged": 15
   },
-  "action": "Main action",
   "target": "One creature",
-  "stats": [
-    "M",
-    "A"
-  ],
+  "flavor": "Breathe... aim... wait... then strike!",
+  "stats": ["M", "A"],
   "tiers": {
     "1": {
       "damage": 3,
       "effects": [],
-      "rider": "If you didn’t move this turn, add your chosen characteristic as extra damage"
+      "rider": null
     },
     "2": {
       "damage": 6,
       "effects": [],
-      "rider": "If you didn’t move this turn, add your chosen characteristic as extra damage"
+      "rider": null
     },
     "3": {
       "damage": 13,
       "effects": [],
-      "rider": "If you didn’t move this turn, add your chosen characteristic as extra damage"
+      "rider": null
     }
-  }
+  },
+  "extra_effect": "If you don't take a move action this turn, this strike deals extra damage equal to your Might or Agility score (your choice)."
 }

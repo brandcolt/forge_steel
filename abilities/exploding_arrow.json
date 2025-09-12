@@ -1,23 +1,34 @@
 {
   "name": "Exploding Arrow",
-  "tags": ["Magic", "Ranged", "Strike", "Weapon"],
-  "range": "Ranged 15",
+  "tags": [
+    "Magic",
+    "Ranged",
+    "Strike",
+    "Weapon"
+  ],
+  "action": "Main Action",
+  "range": {
+    "ranged": 15
+  },
   "target": "One creature or object",
-  "action": "Main",
-  "stats": ["A", "R", "I", "P"],
+  "flavor": "Your ammunition explodes with magical energy.",
+  "stats": [],
   "tiers": {
     "1": {
       "damage": 5,
-      "effects": ["Fire damage"]
+      "effects": [],
+      "rider": null
     },
     "2": {
       "damage": 7,
-      "effects": ["Fire damage"]
+      "effects": [],
+      "rider": null
     },
     "3": {
       "damage": 10,
-      "effects": ["Fire damage"]
+      "effects": [],
+      "rider": null
     }
   },
-  "extra_effect": "One creature or object of your choice within 2 squares of the target takes fire damage equal to the characteristic score used for this ability’s power roll."
+  "extra_effect": "- roll: Power Roll + Agility, Reason, Intuition, or Presence\n    t1: 5 + A, R, I, or P fire damage\n    t2: 7 + A, R, I, or P fire damage\n    t3: 10 + A, R, I, or P fire damage\n  - effect: One creature or object of your choice within 2 squares of the target\n      takes fire damage equal to the characteristic score used for this\n      ability's power roll."
 }

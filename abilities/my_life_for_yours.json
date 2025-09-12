@@ -1,0 +1,17 @@
+{
+  "name": "My Life for Yours",
+  "tags": [
+    "Magic",
+    "Ranged"
+  ],
+  "action": "Main action",
+  "range": {
+    "ranged": 10,
+    "self": true
+  },
+  "target": "Self or one ally",
+  "flavor": "You channel some of your vitality into more resilience for you or an ally.",
+  "stats": [],
+  "tiers": {},
+  "extra_effect": "- effect: You spend a Recovery and the target regains Stamina equal to your\n      recovery value."
+}

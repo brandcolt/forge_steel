@@ -1,0 +1,19 @@
+{
+  "name": "Make Peace With Your God!",
+  "tags": [
+    "-"
+  ],
+  "action": "Maneuver",
+  "range": {
+    "self": true
+  },
+  "target": "Self",
+  "flavor": "Anger is your energy.",
+  "stats": [],
+  "tiers": {},
+  "cost": {
+    "resource": "Ferocity",
+    "amount": 5
+  },
+  "extra_effect": "- effect: You gain 1 surge, and the next ability roll you make this turn\n      automatically obtains a tier 3 outcome."
+}

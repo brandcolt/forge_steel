@@ -1,0 +1,33 @@
+{
+  "name": "Hit and Run",
+  "tags": [
+    "Melee",
+    "Strike",
+    "Weapon"
+  ],
+  "action": "Main Action",
+  "range": {
+    "melee": 1
+  },
+  "target": "One creature or object",
+  "flavor": "Staying in constant motion helps you slip out of reach after a brutal assault.",
+  "stats": [],
+  "tiers": {
+    "1": {
+      "damage": 2,
+      "effects": [],
+      "rider": null
+    },
+    "2": {
+      "damage": 5,
+      "effects": [],
+      "rider": null
+    },
+    "3": {
+      "damage": 7,
+      "effects": [],
+      "rider": "A \\< STRONG, slowed (save ends)"
+    }
+  },
+  "extra_effect": "- roll: Power Roll + Might\n    t1: 2 + M damage\n    t2: 5 + M damage\n    t3: 7 + M damage; A \\< STRONG, slowed (save ends)\n  - effect: You can shift 1 square."
+}

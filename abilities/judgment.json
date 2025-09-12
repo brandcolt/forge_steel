@@ -1,0 +1,16 @@
+{
+  "name": "Judgment",
+  "tags": [
+    "Magic",
+    "Ranged"
+  ],
+  "action": "Maneuver",
+  "range": {
+    "ranged": 10
+  },
+  "target": "One enemy",
+  "flavor": "You utter a prayer that outlines your foe in holy energy.",
+  "stats": [],
+  "tiers": {},
+  "extra_effect": "- effect: \\>-\n      The target is judged by you until the end of the encounter, you use this\n      ability again, you willingly end this effect (no action required), or\n      another censor judges the target."
+}

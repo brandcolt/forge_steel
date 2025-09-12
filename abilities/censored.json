@@ -1,0 +1,37 @@
+{
+  "name": "Censored",
+  "tags": [
+    "Melee",
+    "Strike",
+    "Weapon"
+  ],
+  "action": "Main Action",
+  "range": {
+    "melee": 1
+  },
+  "target": "One creature",
+  "flavor": "Judged and sentenced.",
+  "stats": [],
+  "tiers": {
+    "1": {
+      "damage": 2,
+      "effects": [],
+      "rider": null
+    },
+    "2": {
+      "damage": 3,
+      "effects": [],
+      "rider": null
+    },
+    "3": {
+      "damage": 5,
+      "effects": [],
+      "rider": null
+    }
+  },
+  "cost": {
+    "resource": "Wrath",
+    "amount": 5
+  },
+  "extra_effect": "- roll: Power Roll + Might\n    t1: 2 + M holy damage\n    t2: 3 + M holy damage\n    t3: 5 + M holy damage\n  - effect: When a target who is not a leader or solo creature is made winded by\n      this ability, they are reduced to 0 Stamina."
+}

@@ -1,0 +1,33 @@
+{
+  "name": "Every Step... Death!",
+  "tags": [
+    "Magic",
+    "Ranged",
+    "Strike"
+  ],
+  "action": "Main Action",
+  "range": {
+    "ranged": 10
+  },
+  "target": "One creature",
+  "flavor": "You show your foe a glimpse of their fate after death.",
+  "stats": [],
+  "tiers": {
+    "1": {
+      "damage": 5,
+      "effects": [],
+      "rider": null
+    },
+    "2": {
+      "damage": 7,
+      "effects": [],
+      "rider": null
+    },
+    "3": {
+      "damage": 10,
+      "effects": [],
+      "rider": null
+    }
+  },
+  "extra_effect": "- roll: Power Roll + Presence\n    t1: 5 + P psychic damage\n    t2: 7 + P psychic damage\n    t3: 10 + P psychic damage\n  - effect: Each time the target willingly moves before the end of your next turn,\n      they take 1 psychic damage for each square they move."
+}

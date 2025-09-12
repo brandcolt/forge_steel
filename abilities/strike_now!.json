@@ -1,0 +1,15 @@
+{
+  "name": "Strike Now!",
+  "tags": [
+    "Ranged"
+  ],
+  "action": "Main Action",
+  "range": {
+    "ranged": 10
+  },
+  "target": "One ally",
+  "flavor": "Your foe left an opening. You point this out to an ally!",
+  "stats": [],
+  "tiers": {},
+  "extra_effect": "- effect: The target can use a signature ability as a free triggered action."
+}

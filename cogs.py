@@ -229,6 +229,27 @@ class InitCog(commands.Cog):
         await ctx.respond(f"🔁 **Round {state['round']}** begins. {changed} combatant(s) readied.", ephemeral=False)
         await ctx.interaction.followup.send(embed=render_embed(state))
 
+    # ---------------- Sets the Round ----------------
+    @discord.slash_command(description="Set the current round number (e.g., 1)")
+    @option("round_number", int, min_value=1)
+    @option("ready_all", bool, required=False, default=False, description="If true, move everyone to Ready")
+    async def init_set_round(self, ctx, round_number: int, ready_all: bool = False):
+        msg, state = await load_state(ctx.channel)
+        state["round"] = int(round_number)
+        if ready_all:
+            for e in state.get("entries", []):
+                e["status"] = "ready"
+        state["current"] = None
+        await save_state(msg, state)
+        await ctx.respond(f"⏱️ Round set to **{state['round']}**" + (" and all combatants readied." if ready_all else "."), ephemeral=False)
+        await ctx.interaction.followup.send(embed=render_embed(state))
+
+    # Resets round to 1, optionally readying everyone
+    @discord.slash_command(description="Reset the round counter to 1 (optionally ready everyone)")
+    @option("ready_all", bool, required=False, default=False)
+    async def init_reset_round(self, ctx, ready_all: bool = False):
+        await self.init_set_round.callback(self, ctx, 1, ready_all)  # reuse logic above
+
     # ---------------- Show Tracker ----------------
     @discord.slash_command(description="Show the current initiative tracker state")
     async def init_show(self, ctx):
@@ -564,7 +585,7 @@ class DSCog(commands.Cog):
 
         total_damage = base_damage + stat_value + kit_bonus
 
-        # embed
+        # Setup the tracker embed to render
         color = 0xE74C3C if tier == 1 else (0x2ECC71 if tier == 2 else 0xF1C40F)
         title = ability_data.get("name", ability)
         e = discord.Embed(title=f"✨ {title}", color=color)

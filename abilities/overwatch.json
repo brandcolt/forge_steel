@@ -1,0 +1,15 @@
+{
+  "name": "Overwatch",
+  "tags": [
+    "Ranged"
+  ],
+  "action": "Main action",
+  "range": {
+    "ranged": 10
+  },
+  "target": "One creature",
+  "flavor": "Under your direction, an ally waits for just the right moment to strike.",
+  "stats": [],
+  "tiers": {},
+  "extra_effect": "- effect: At any time during the target's movement, one ally can make a free\n      strike against them."
+}

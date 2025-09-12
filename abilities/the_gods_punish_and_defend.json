@@ -1,0 +1,38 @@
+{
+  "name": "The Gods Punish and Defend",
+  "tags": [
+    "Magic",
+    "Melee",
+    "Strike",
+    "Weapon"
+  ],
+  "action": "Main Action",
+  "range": {
+    "melee": 1
+  },
+  "target": "One creature or object",
+  "flavor": "You channel holy energy to smite a foe and heal an ally.",
+  "stats": [],
+  "tiers": {
+    "1": {
+      "damage": 5,
+      "effects": [],
+      "rider": null
+    },
+    "2": {
+      "damage": 8,
+      "effects": [],
+      "rider": null
+    },
+    "3": {
+      "damage": 11,
+      "effects": [],
+      "rider": null
+    }
+  },
+  "cost": {
+    "resource": "Wrath",
+    "amount": 3
+  },
+  "extra_effect": "- roll: Power Roll + Might\n    t1: 5 + M holy damage\n    t2: 8 + M holy damage\n    t3: 11 + M holy damage\n  - effect: You can spend a Recovery to allow yourself or one ally within 10 squares\n      to regain Stamina equal to your recovery value."
+}
