@@ -1,0 +1,30 @@
+{
+  "name": "Power Chord",
+  "tags": [
+    "Area",
+    "Magic"
+  ],
+  "action": "Maneuver",
+  "range": {},
+  "target": "Each enemy in the area",
+  "flavor": "Your instrument rings true and your music blows everyone away.",
+  "stats": [],
+  "tiers": {
+    "1": {
+      "damage": 0,
+      "effects": [],
+      "rider": null
+    },
+    "2": {
+      "damage": 0,
+      "effects": [],
+      "rider": null
+    },
+    "3": {
+      "damage": 0,
+      "effects": [],
+      "rider": null
+    }
+  },
+  "extra_effect": "- roll: Power Roll + Presence\n    t1: Push 1\n    t2: Push 2\n    t3: Push 3\n```"
+}

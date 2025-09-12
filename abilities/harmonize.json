@@ -1,0 +1,19 @@
+{
+  "name": "Harmonize",
+  "tags": [
+    "Ranged"
+  ],
+  "action": "Main action",
+  "range": {
+    "ranged": 5
+  },
+  "target": "One ally",
+  "flavor": "Give the chorus a little punch.",
+  "stats": [],
+  "tiers": {},
+  "cost": {
+    "resource": "Drama",
+    "amount": 3
+  },
+  "extra_effect": "- effect: The target can choose one additional target for the triggering ability.\n      Any damage dealt to the additional target is sonic damage."
+}

@@ -1,0 +1,17 @@
+{
+  "name": "Ballad of the Beast",
+  "tags": [
+    "Area",
+    "Magic",
+    "Performance"
+  ],
+  "action": "Main action",
+  "range": {
+    "self": true
+  },
+  "target": "Self and each ally in the area",
+  "flavor": "Teeth are bare! ♪ Eyes black! ♪ No escaping the beast!♪",
+  "stats": [],
+  "tiers": {},
+  "extra_effect": "- effect: While this performance is active, each target who starts their turn in\n      the area gains 1 surge."
+}

@@ -1,0 +1,37 @@
+{
+  "name": "Method Acting",
+  "tags": [
+    "Melee",
+    "Strike",
+    "Weapon"
+  ],
+  "action": "Main Action",
+  "range": {
+    "melee": 1
+  },
+  "target": "One creature",
+  "flavor": "They're so hurt by your performance, you start to believe it yourself.",
+  "stats": [],
+  "tiers": {
+    "1": {
+      "damage": 6,
+      "effects": [],
+      "rider": "P \\< WEAK, weakened (save ends)"
+    },
+    "2": {
+      "damage": 10,
+      "effects": [],
+      "rider": "P \\< AVERAGE, weakened (save ends)"
+    },
+    "3": {
+      "damage": 14,
+      "effects": [],
+      "rider": "P \\< STRONG, weakened (save ends)"
+    }
+  },
+  "cost": {
+    "resource": "Drama",
+    "amount": 5
+  },
+  "extra_effect": "- roll: Power Roll + Agility\n    t1: 6 + A damage; P \\< WEAK, weakened (save ends)\n    t2: 10 + A damage; P \\< AVERAGE, weakened (save ends)\n    t3: 14 + A damage; P \\< STRONG, weakened (save ends)\n  - effect: You can become bleeding (save ends) to deal an extra 5 corruption damage\n      to the target."
+}

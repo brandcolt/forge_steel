@@ -1,0 +1,34 @@
+{
+  "name": "Hypnotic Overtones",
+  "tags": [
+    "Area",
+    "Magic"
+  ],
+  "action": "Main Action",
+  "range": {},
+  "target": "Each enemy in the area",
+  "flavor": "You produce an entrancing note that twists the senses in a spectacular fashion.",
+  "stats": [],
+  "tiers": {
+    "1": {
+      "damage": 0,
+      "effects": [],
+      "rider": null
+    },
+    "2": {
+      "damage": 0,
+      "effects": [],
+      "rider": null
+    },
+    "3": {
+      "damage": 0,
+      "effects": [],
+      "rider": null
+    }
+  },
+  "cost": {
+    "resource": "Drama",
+    "amount": 3
+  },
+  "extra_effect": "- roll: Power Roll + Presence\n    t1: Slide 1; I \\< WEAK, dazed (save ends)\n    t2: Slide 1; I \\< AVERAGE, dazed (save ends)\n    t3: Slide 2; I \\< STRONG, dazed (save ends)\n  - effect: The size of the burst increases by 1 for every 2 drama spent."
+}

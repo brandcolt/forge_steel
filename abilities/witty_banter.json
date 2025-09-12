@@ -1,0 +1,35 @@
+{
+  "name": "Witty Banter",
+  "tags": [
+    "Magic",
+    "Melee",
+    "Ranged",
+    "Strike"
+  ],
+  "action": "Main Action",
+  "range": {
+    "melee": 1,
+    "ranged": 5
+  },
+  "target": "One creature",
+  "flavor": "A lyrical (and physical) jab insults an enemy and inspires an ally.",
+  "stats": [],
+  "tiers": {
+    "1": {
+      "damage": 4,
+      "effects": [],
+      "rider": null
+    },
+    "2": {
+      "damage": 5,
+      "effects": [],
+      "rider": null
+    },
+    "3": {
+      "damage": 7,
+      "effects": [],
+      "rider": null
+    }
+  },
+  "extra_effect": "- roll: Power Roll + Presence\n    t1: 4 + P psychic damage\n    t2: 5 + P psychic damage\n    t3: 7 + P psychic damage\n  - effect: One ally within 10 squares of you can end one effect on them that is\n      ended by a saving throw or that ends at the end of their turn."
+}

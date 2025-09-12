@@ -1,0 +1,17 @@
+{
+  "name": "Revitalizing Limerick",
+  "tags": [
+    "Area",
+    "Magic",
+    "Performance"
+  ],
+  "action": "Main action",
+  "range": {
+    "self": true
+  },
+  "target": "Self and each ally in the area",
+  "flavor": "There once was a man from Capital...",
+  "stats": [],
+  "tiers": {},
+  "extra_effect": "- effect: At the end of each of your turns while this performance is active, you\n      can choose up to a number of targets equal to your Presence score. Each\n      chosen target can spend a Recovery."
+}

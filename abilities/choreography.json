@@ -1,0 +1,17 @@
+{
+  "name": "Choreography",
+  "tags": [
+    "Area",
+    "Magic",
+    "Performance"
+  ],
+  "action": "Main action",
+  "range": {
+    "self": true
+  },
+  "target": "Self and each ally in the area",
+  "flavor": "Taps, kicks, steps. It's all \"choreography.",
+  "stats": [],
+  "tiers": {},
+  "extra_effect": "- effect: While this performance is active, each target who starts their turn in\n      the area gains a +2 bonus to speed until the end of their turn."
+}
