@@ -293,8 +293,9 @@ OWNER = "SteelCompendium"
 REPO  = "data-md-dse"
 
 CATEGORIES = [
-    "Rules/Abilities/Troubadour/1st-Level Features",
+    #"Rules/Abilities/Troubadour/1st-Level Features",
     #"Rules/Abilities/Kits/Shining Armor",
+    'Rules/Abilities/Common/Maneuvers',
 ]
 
 URLS_TO_FETCH = []  # leave empty to use CATEGORIES via API

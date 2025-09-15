@@ -1,0 +1,11 @@
+{
+  "name": "Use Consumable",
+  "tags": [],
+  "action": "Maneuver",
+  "range": {},
+  "target": null,
+  "flavor": null,
+  "stats": [],
+  "tiers": {},
+  "extra_effect": "- effect: \"Unless otherwise noted in its description, a creature can activate a\n      consumable treasure such as a potion with the Use Consumable maneuver. A\n      creature can use this maneuver to administer a consumable treasure that\n      benefits the user either to themself or to a willing adjacent creature.\n      See [Consumables](#page-328-0) in [Chapter 13: Rewards](#page-327-1).\"\n```"
+}

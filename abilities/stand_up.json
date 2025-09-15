@@ -1,0 +1,11 @@
+{
+  "name": "Stand Up",
+  "tags": [],
+  "action": "Maneuver",
+  "range": {},
+  "target": null,
+  "flavor": null,
+  "stats": [],
+  "tiers": {},
+  "extra_effect": "- effect: A creature can use the Stand Up maneuver to stand up if they are prone,\n      ending that condition. Alternatively, they can use this maneuver to make a\n      willing adjacent prone creature stand up.\n```"
+}

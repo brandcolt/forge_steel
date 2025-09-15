@@ -1,0 +1,11 @@
+{
+  "name": "Catch Breath",
+  "tags": [],
+  "action": "Maneuver",
+  "range": {},
+  "target": null,
+  "flavor": null,
+  "stats": [],
+  "tiers": {},
+  "extra_effect": "- effect: \\>-\n      A creature who uses the Catch Breath maneuver spends a Recovery and\n      regains Stamina equal to their recovery value. (See below for\n      [Stamina.](#page-291-0) See [Recoveries](#page-21-3) in [Chapter 1: The\n      Basics](#page-17-3).)"
+}

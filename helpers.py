@@ -1,17 +1,33 @@
-import discord, random, json, os, re
+# REPLACE your first import line with this:
+import discord, random, json, os, re, base64, zlib
 from typing import Tuple, List
 
 TRACKER_TAG = "[INITIATIVE TRACKER]"
 JSON_RE = re.compile(r"```json\n(.*?)\n```", re.DOTALL)
+DSZ_RE  = re.compile(r"```dsz\n(.*?)\n```", re.DOTALL)  # compressed fallback
 
 ZWSP = "\u200B"
 
 def empty_state():
-    return {"entries": [], "active": 0, "round": 1, "current": None}
+    # include monster_groups so renderers/autocomplete never KeyError
+    return {"entries": [], "active": 0, "round": 1, "current": None, "monster_groups": []}
+
+def _encode_state(state: dict) -> str:
+    raw = json.dumps(state, separators=(",", ":")).encode("utf-8")
+    return base64.b64encode(zlib.compress(raw)).decode("ascii")
+
+def _decode_state(s: str) -> dict:
+    raw = zlib.decompress(base64.b64decode(s.encode("ascii")))
+    return json.loads(raw.decode("utf-8"))
 
 def render_content(state):
+    # Prefer plain JSON for readability; if too large, fall back to compressed.
     data = json.dumps(state, separators=(",", ":"))
-    return f"{TRACKER_TAG}\n||```json\n{data}\n```||"
+    txt = f"{TRACKER_TAG}\n||```json\n{data}\n```||"
+    if len(txt) <= 1900:  # headroom under Discord's 2000 limit
+        return txt
+    enc = _encode_state(state)
+    return f"{TRACKER_TAG}\n||```dsz\n{enc}\n```||"
 
 async def find_or_create_tracker_message(channel: discord.TextChannel):
     # look through pinned messages for an existing tracker
@@ -34,25 +50,45 @@ async def find_or_create_tracker_message(channel: discord.TextChannel):
 async def load_state(channel: discord.TextChannel) -> Tuple[discord.Message, dict]:
     msg = await find_or_create_tracker_message(channel)
     state = extract_state_from_message(msg)
+
+    # ensure required keys exist
+    state.setdefault("entries", [])
+    state.setdefault("active", 0)
+    state.setdefault("round", 1)
+    state.setdefault("current", None)
+    state.setdefault("monster_groups", [])
+
+    # clamp active within range
     if state["entries"]:
-        state["active"] = max(0, min(state.get("active", 0), len(state["entries"]) - 1))
+        state["active"] = max(0, min(int(state.get("active", 0)), len(state["entries"]) - 1))
     else:
         state["active"] = 0
+
     return msg, state
 
 async def save_state(msg: discord.Message, state: dict):
     await msg.edit(content=render_content(state), embed=render_embed(state))
 
+
 def extract_state_from_message(msg: discord.Message):
     if not msg or not msg.content:
         return empty_state()
+    # 1) Try legacy plain JSON first
     m = JSON_RE.search(msg.content)
-    if not m:
-        return empty_state()
-    try:
-        return json.loads(m.group(1))
-    except Exception:
-        return empty_state()
+    if m:
+        try:
+            return json.loads(m.group(1))
+        except Exception:
+            return empty_state()
+    # 2) Try compressed fallback
+    m2 = DSZ_RE.search(msg.content)
+    if m2:
+        try:
+            return _decode_state(m2.group(1).strip())
+        except Exception:
+            return empty_state()
+    return empty_state()
+
 
 # Kit / ability helpers
 def load_json(path):

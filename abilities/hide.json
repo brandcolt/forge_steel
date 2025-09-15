@@ -1,0 +1,11 @@
+{
+  "name": "Hide",
+  "tags": [],
+  "action": "Maneuver",
+  "range": {},
+  "target": null,
+  "flavor": null,
+  "stats": [],
+  "tiers": {},
+  "extra_effect": "- effect: \"Using the Hide maneuver, a creature attempts to hide from other\n      creatures who aren't observing them while they have cover or concealment.\n      See Hide and Sneak in Chapter 9: Tests for full details.\"\n```"
+}

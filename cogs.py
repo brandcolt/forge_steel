@@ -13,7 +13,7 @@ from helpers import (
 class InitCog(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
-    # ---------------- Add Character ----------------
+        # ---------------- Add Character ----------------
     @discord.slash_command(description="Add a Draw Steel character to the tracker")
     @option("name", str)
     @option("stamina", int, description="Stamina")
@@ -37,70 +37,73 @@ class InitCog(commands.Cog):
         kit: str = None, kit_melee: str = "0 0 0", kit_ranged: str = "0 0 0",
         is_player: bool = True, group: str = None
     ):
-        # defer immediately to avoid "Unknown interaction" if work takes >3s
         await ctx.defer()
-        msg, state = await load_state(ctx.channel)
+        try:
+            msg, state = await load_state(ctx.channel)
 
-        # enforce groups for monsters only
-        if group and is_player:
-            await ctx.respond("Groups are for monsters only — set `is_player` to false to assign a group.", ephemeral=True)
-            return
-
-        # Resolve kit arrays
-        kit_melee_arr = [0,0,0]
-        kit_ranged_arr = [0,0,0]
-        kit_name = None
-
-        if group and group.strip():
-            group = group.strip()
-            state.setdefault("monster_groups", [])
-            if group not in state["monster_groups"]:
-                state["monster_groups"].append(group)
-
-        if kit and kit.strip():
-            data = load_kit(kit)
-            if not data:
-                await ctx.respond(f"Kit **{kit}** not found in `/kits`.", ephemeral=True)
+            # enforce groups for monsters only
+            if group and is_player:
+                await ctx.interaction.followup.send(
+                    "Groups are for monsters only — set `is_player` to false to assign a group.", ephemeral=True
+                )
                 return
-            kit_melee_arr = list(map(int, data.get("melee", [0,0,0])))[:3] + [0]*3
-            kit_ranged_arr = list(map(int, data.get("ranged", [0,0,0])))[:3] + [0]*3
-            kit_melee_arr = kit_melee_arr[:3]
-            kit_ranged_arr = kit_ranged_arr[:3]
-            kit_name = data.get("name") or kit
-        else:
-            kit_melee_arr = parse_three_space_numbers(kit_melee)
-            kit_ranged_arr = parse_three_space_numbers(kit_ranged)
 
-        entry = {
-            "name": name,
-            # store both current and max stamina (current starts equal to max)
-            "stamina": int(stamina),
-            "max_stamina": int(stamina),
-            "STA": int(stability),
-            "M": int(m), "A": int(a), "R": int(r), "I": int(i), "P": int(p),
-            "speed": int(speed), "shift": int(shift), "recoveries": int(recoveries),
-            "kit": kit_name,
-            "kit_melee": kit_melee_arr,
-            "kit_ranged": kit_ranged_arr,
-            "is_player": bool(is_player),
-            "status": "ready",
-            "group": group or None,
-        }
+            # Resolve kit arrays
+            kit_melee_arr = [0,0,0]
+            kit_ranged_arr = [0,0,0]
+            kit_name = None
 
-        # ensure group is registered in ordering list
-        if group:
-            state.setdefault("monster_groups", [])
-            if group not in state["monster_groups"]:
-                state["monster_groups"].append(group)
+            if group and group.strip():
+                group = group.strip()
+                state.setdefault("monster_groups", [])
+                if group not in state["monster_groups"]:
+                    state["monster_groups"].append(group)
 
-        idx = next((ix for ix,e in enumerate(state["entries"]) if e["name"].lower()==name.lower()), None)
-        if idx is not None:
-            state["entries"][idx] = entry
-        else:
+            if kit and kit.strip():
+                data = load_kit(kit)
+                if not data:
+                    await ctx.interaction.followup.send(f"Kit **{kit}** not found in `/kits`.", ephemeral=True)
+                    return
+                kit_melee_arr  = list(map(int, data.get("melee",  [0,0,0])))[:3]
+                kit_ranged_arr = list(map(int, data.get("ranged", [0,0,0])))[:3]
+                kit_name = data.get("name") or kit
+            else:
+                kit_melee_arr = parse_three_space_numbers(kit_melee)
+                kit_ranged_arr = parse_three_space_numbers(kit_ranged)
+
+            entry = {
+                "name": name,
+                "stamina": int(stamina),
+                "max_stamina": int(stamina),
+                "STA": int(stability),
+                "M": int(m), "A": int(a), "R": int(r), "I": int(i), "P": int(p),
+                "speed": int(speed), "shift": int(shift), "recoveries": int(recoveries),
+                "kit": kit_name,
+                "kit_melee": kit_melee_arr,
+                "kit_ranged": kit_ranged_arr,
+                "is_player": bool(is_player),
+                "status": "ready",
+                "group": group or None,
+            }
+
+            # ensure group is registered
+            if group:
+                state.setdefault("monster_groups", [])
+                if group not in state["monster_groups"]:
+                    state["monster_groups"].append(group)
+
+            # prevent dup names
+            if any(e["name"].lower() == entry["name"].lower() for e in state["entries"]):
+                await ctx.interaction.followup.send(f"A character named **{entry['name']}** already exists.", ephemeral=True)
+                return
+
             state["entries"].append(entry)
+            await save_state(msg, state)
+            await ctx.interaction.followup.send(embed=render_embed(state))
+        except Exception as ex:
+            await ctx.interaction.followup.send(f"Init add failed: `{ex}`", ephemeral=True)
+            raise
 
-        await save_state(msg, state)
-        await ctx.respond(embed=render_embed(state), ephemeral=False)
 
     # ---------------- Update Character Field ----------------
     @discord.slash_command(description="Update a single field on a character in the tracker")
@@ -229,10 +232,12 @@ class InitCog(commands.Cog):
         await ctx.respond(f"🔁 **Round {state['round']}** begins. {changed} combatant(s) readied.", ephemeral=False)
         await ctx.interaction.followup.send(embed=render_embed(state))
 
-    # ---------------- Sets the Round ----------------
+
+    # ---------------- Set Round ----------------
     @discord.slash_command(description="Set the current round number (e.g., 1)")
     @option("round_number", int, min_value=1)
-    @option("ready_all", bool, required=False, default=False, description="If true, move everyone to Ready")
+    @option("ready_all", bool, required=False, default=False,
+            description="If true, move everyone to Ready")
     async def init_set_round(self, ctx, round_number: int, ready_all: bool = False):
         msg, state = await load_state(ctx.channel)
         state["round"] = int(round_number)
@@ -241,7 +246,10 @@ class InitCog(commands.Cog):
                 e["status"] = "ready"
         state["current"] = None
         await save_state(msg, state)
-        await ctx.respond(f"⏱️ Round set to **{state['round']}**" + (" and all combatants readied." if ready_all else "."), ephemeral=False)
+        await ctx.respond(
+            f"⏱️ Round set to **{state['round']}**" + (" and all combatants readied." if ready_all else "."),
+            ephemeral=False
+        )
         await ctx.interaction.followup.send(embed=render_embed(state))
 
     # Resets round to 1, optionally readying everyone
@@ -462,7 +470,9 @@ class DSCog(commands.Cog):
         e.add_field(name="Damage", value=str(amount), inline=True)
         e.add_field(name="Stamina", value=f"{new}/{target_entry.get('max_stamina', new)}", inline=False)
         await ctx.respond(embed=e)
-        await ctx.interaction.followup.send(embed=render_embed(state))
+        
+        # Displays updated tracker
+        #await ctx.interaction.followup.send(embed=render_embed(state)) # Commented out to reduce spam, as /ds_damage is often used in combat
 
     # ---------------- Heal command ----------------
     @discord.slash_command(description="Heal a character in the tracker (cannot exceed max_stamina)")
@@ -497,7 +507,9 @@ class DSCog(commands.Cog):
         e.add_field(name="Healed", value=str(amount), inline=True)
         e.add_field(name="Stamina", value=f"{new}/{target_entry.get('max_stamina', new)}", inline=False)
         await ctx.respond(embed=e)
-        await ctx.interaction.followup.send(embed=render_embed(state))
+        
+        # Displays updated tracker
+        #await ctx.interaction.followup.send(embed=render_embed(state)) # Commented out to reduce spam, as /ds_heal is often used in combat
 
     # ---------------- Use Ability (loads JSON, applies kit bonuses, edges/banes) ----------------
     @discord.slash_command(description="Use a Draw Steel ability from /abilities (applies kit bonuses)")
@@ -652,7 +664,7 @@ class DSCog(commands.Cog):
             await save_state(msg, state)
             e.add_field(name="Target", value=f"**{target_entry['name']}** took **{total_damage}** damage — Stamina {new}/{target_entry.get('max_stamina', new)}", inline=False)
             await ctx.respond(embed=e)
-            await ctx.interaction.followup.send(embed=render_embed(state))
+            #await ctx.interaction.followup.send(embed=render_embed(state))
             return
 
         await ctx.respond(embed=e)
@@ -678,4 +690,4 @@ class DSCog(commands.Cog):
         e.add_field(name="Remaining", value=f"{len(state['entries'])} combatant(s)", inline=True)
         await ctx.respond(embed=e)
         # show updated tracker as followup
-        await ctx.interaction.followup.send(embed=render_embed(state))
+        #await ctx.interaction.followup.send(embed=render_embed(state)) # Commented out to reduce spam, as /ds_remove is often used in combat

@@ -1,0 +1,29 @@
+{
+  "name": "Escape Grab",
+  "tags": [],
+  "action": "Maneuver",
+  "range": {
+    "self": true
+  },
+  "target": "Self",
+  "flavor": null,
+  "stats": [],
+  "tiers": {
+    "1": {
+      "damage": 0,
+      "effects": [],
+      "rider": null
+    },
+    "2": {
+      "damage": 0,
+      "effects": [],
+      "rider": null
+    },
+    "3": {
+      "damage": 0,
+      "effects": [],
+      "rider": null
+    }
+  },
+  "extra_effect": "- effect: \\>-\n      A creature who is grabbed by another creature, an object, or an effect\n      (see [Grab](#page-287-5) below) can attempt to escape by using the\n      following ability."
+}

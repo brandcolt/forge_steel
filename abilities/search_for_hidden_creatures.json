@@ -1,0 +1,11 @@
+{
+  "name": "Search for Hidden Creatures",
+  "tags": [],
+  "action": "Maneuver",
+  "range": {},
+  "target": null,
+  "flavor": null,
+  "stats": [],
+  "tiers": {},
+  "extra_effect": "- effect: \"The Search for Hidden Creatures maneuver allows a creature to attempt\n      to locate creatures hidden from them (see Hide and Sneak in Chapter 9:\n      Tests).\"\n```"
+}
