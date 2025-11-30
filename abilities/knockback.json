@@ -6,24 +6,24 @@
     "melee": 1
   },
   "target": "One creature**",
-  "flavor": "Power Roll + Might t1: Push 1 t2: Push 2 t3: Push 3 - effect: You can usually target only creatures of your size or smaller. If your Might score is 2 or higher, you can target any creature with a size equal to or less than your Might score",
+  "flavor": "Power Roll + Might ",
   "stats": [],
   "tiers": {
     "1": {
       "damage": 0,
       "effects": [],
-      "rider": null
+      "rider": "t1: Push 1"
     },
     "2": {
       "damage": 0,
       "effects": [],
-      "rider": null
+      "rider": "t2: Push 2"
     },
     "3": {
       "damage": 0,
       "effects": [],
-      "rider": null
+      "rider": "t3: Push 3"
     }
   },
-  "extra_effect": "- effect: \\>-\n      A creature wanting to push an adjacent creature away from them can attempt\n      to shove that creature using the following ability."
+  "extra_effect": "effect: You can usually target only creatures of your size or smaller. If your Might score is 2 or higher, you can target any creature with a size equal to or less than your Might score"
 }

@@ -40,13 +40,21 @@ from cogs import InitCog, DSCog
 @bot.event
 async def on_ready():
     print(f"Logged in as {bot.user} (commands may still propagate)")
+    
+    # Force sync all commands
+    print("Syncing commands...")
+    await bot.sync_commands(force=True)
+    print("Commands synced!")
+    
+    # Print registered commands
     tree = getattr(bot, "tree", None)
     if tree is not None:
         try:
             names = [c.name for c in tree.get_commands()]
+            print("Registered application commands:", names)
         except Exception:
             names = []
-        print("Registered application commands:", names)
+            print("Could not list registered commands")
     else:
         print("No command tree available on this Bot instance; skipping registered-commands listing.")
 

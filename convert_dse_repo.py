@@ -2,7 +2,7 @@ import re, json, os, sys, urllib.parse, urllib.request
 from pathlib import Path
 
 # --- CONFIG -------------------------------------------------------
-REPO_ROOT = "https://raw.githubusercontent.com/SteelCompendium/data-md-dse/main/Rules/Abilities"
+REPO_ROOT = "https://github.com/SteelCompendium/data-md/tree/main/Bestiary"
 OUT_DIR   = "abilities_converted"
 # -----------------------------------------------------------------
 
@@ -295,7 +295,8 @@ REPO  = "data-md-dse"
 CATEGORIES = [
     #"Rules/Abilities/Troubadour/1st-Level Features",
     #"Rules/Abilities/Kits/Shining Armor",
-    'Rules/Abilities/Common/Maneuvers',
+    #'Rules/Abilities/Common/Maneuvers',
+    'Bestiary/Monsters/Monsters/Goblins',
 ]
 
 URLS_TO_FETCH = []  # leave empty to use CATEGORIES via API

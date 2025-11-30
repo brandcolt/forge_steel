@@ -25,17 +25,20 @@ class InitCog(commands.Cog):
     @option("p", int, description="Presence")
     @option("speed", int)
     @option("shift", int)
-    @option("recoveries", int)
+    @option("recoveries", int, description="Maximum recoveries")
     @option("kit", str, description="Pick a kit (or leave blank to enter custom bonuses)", required=False, autocomplete=ac_kit)
     @option("kit_melee", str, description="Melee kit bonuses (e.g. '1 2 2')", required=False, default="0 0 0")
     @option("kit_ranged", str, description="Ranged kit bonuses (e.g. '1 1 1')", required=False, default="0 0 0")
     @option("is_player", bool, default=True)
     @option("group", str, required=False, description="Monster initiative group (enemies only)", autocomplete=ac_group)
+    @option("su", int, description="Surges", default=0)
+    @option("hr", int, description="Heroic Resources", default=0)
     async def init_add(
-        self, ctx, name: str, stamina: int, stability: int, m: int, a: int, r: int, i: int, p: int,
-        speed: int, shift: int, recoveries: int,
-        kit: str = None, kit_melee: str = "0 0 0", kit_ranged: str = "0 0 0",
-        is_player: bool = True, group: str = None
+        self, ctx, name: str, stamina: int, stability: int, 
+                  m: int, a: int, r: int, i: int, p: int,
+                  speed: int, shift: int, recoveries: int,
+                  kit: str = None, kit_melee: str = "0 0 0", kit_ranged: str = "0 0 0",
+                  is_player: bool = True, group: str = None, su: int = 0, hr: int = 0
     ):
         await ctx.defer()
         try:
@@ -77,13 +80,18 @@ class InitCog(commands.Cog):
                 "max_stamina": int(stamina),
                 "STA": int(stability),
                 "M": int(m), "A": int(a), "R": int(r), "I": int(i), "P": int(p),
-                "speed": int(speed), "shift": int(shift), "recoveries": int(recoveries),
+                "speed": int(speed), 
+                "shift": int(shift),
+                "recoveries": int(recoveries),     # Current recoveries starts at max
+                "max_recoveries": int(recoveries), # Max recoveries from parameter
                 "kit": kit_name,
                 "kit_melee": kit_melee_arr,
                 "kit_ranged": kit_ranged_arr,
                 "is_player": bool(is_player),
                 "status": "ready",
                 "group": group or None,
+                "Su": su,   # Initialize Surge to parameter
+                "HR": hr,   # Initialize Heroic Resource to parameter
             }
 
             # ensure group is registered
@@ -109,7 +117,9 @@ class InitCog(commands.Cog):
     @discord.slash_command(description="Update a single field on a character in the tracker")
     @option("name", str, description="Existing character name", autocomplete=ac_character)
     @option("field", str, description="Which field to update",
-            choices=["name","stamina","max_stamina","group","STA","M","A","R","I","P","speed","shift","recoveries","kit_melee","kit_ranged","is_player"])
+            choices=["name","stamina","max_stamina","group","STA","M","A","R","I","P",
+                    "speed","shift","recoveries","kit_melee","kit_ranged","is_player",
+                    "Su","HR"])
     @option("value", str, description="New value (e.g. '27' or '1 2 2' or 'true')")  
     async def init_update(self, ctx, name: str, field: str, value: str):
         msg, state = await load_state(ctx.channel)
@@ -119,6 +129,7 @@ class InitCog(commands.Cog):
             return
 
         entry = state["entries"][idx]
+        old_value = entry.get(field, "0")  # Store old value for comparison
         try:
             if field in ["stamina","max_stamina","group","STA","M","A","R","I","P","speed","shift","recoveries"]:
                 if field == "stamina":
@@ -132,35 +143,59 @@ class InitCog(commands.Cog):
                 elif field == "group":
                     new_group = value.strip() or None
                     if entry.get("is_player", True) and new_group:
-                        await ctx.respond("Cannot assign a group to a player.", ephemeral=True); return
+                        await ctx.respond("Cannot assign a group to a player.", ephemeral=True)
+                        return
                     entry["group"] = new_group
                     if new_group:
                         state.setdefault("monster_groups", [])
                         if new_group not in state["monster_groups"]:
                             state["monster_groups"].append(new_group)
-                elif field == "STA":
-                    entry["STA"] = int(value)
                 else:
                     entry[field] = int(value)
             elif field in ["kit_melee","kit_ranged"]:
+                old_value = " ".join(map(str, entry.get(field, [0,0,0])))  # Format old array
                 entry[field] = parse_three_space_numbers(value)
+                value = " ".join(map(str, entry[field]))  # Format new array
             elif field == "is_player":
+                old_value = str(entry.get(field, True)).lower()
                 entry[field] = str(value).strip().lower() in ["1","true","yes","y","on"]
+                value = str(entry[field]).lower()
             elif field == "name":
                 new_name = value.strip()
                 if not new_name:
-                    await ctx.respond("Name cannot be empty.", ephemeral=True); return
+                    await ctx.respond("Name cannot be empty.", ephemeral=True)
+                    return
                 if any(e["name"].lower()==new_name.lower() for e in state["entries"] if e is not entry):
-                    await ctx.respond(f"A character named **{new_name}** already exists.", ephemeral=True); return
+                    await ctx.respond(f"A character named **{new_name}** already exists.", ephemeral=True)
+                    return
                 entry["name"] = new_name
+            elif field in ["Su", "HR"]:
+                try:
+                    val = int(value)
+                    if val < 0:
+                        await ctx.respond(f"Value for {field} cannot be negative", ephemeral=True)
+                        return
+                    entry[field] = val
+                except ValueError:
+                    await ctx.respond(f"Invalid value for {field}. Must be a number.", ephemeral=True)
+                    return
             else:
-                await ctx.respond(f"Unsupported field: `{field}`", ephemeral=True); return
+                await ctx.respond(f"Unsupported field: `{field}`", ephemeral=True)
+                return
         except ValueError:
-            await ctx.respond(f"Could not parse `{value}` for `{field}`.", ephemeral=True); return
+            await ctx.respond(f"Could not parse `{value}` for `{field}`.", ephemeral=True)
+            return
 
         state["entries"][idx] = entry
         await save_state(msg, state)
-        await ctx.respond(embed=render_embed(state), ephemeral=False)
+        
+        # Create an embed to show the change
+        e = discord.Embed(title="✏️ Character Updated", color=0x3498DB)
+        e.add_field(name="Character", value=entry["name"], inline=True)
+        e.add_field(name="Field", value=field, inline=True)
+        e.add_field(name="Change", value=f"`{old_value}` → `{value}`", inline=True)
+        
+        await ctx.respond(embed=e)
 
     # ---------------- Clear Tracker ----------------
     @discord.slash_command(description="Clear the tracker")
@@ -385,7 +420,7 @@ class DSCog(commands.Cog):
     # ---------------- Edit Character ----------------
     @discord.slash_command(description="Edit one field on a character")
     @option("character", str, autocomplete=_auto_character)
-    @option("field", str, choices=["name","stamina","max_stamina","M","A","R","I","P","speed","shift","recoveries","kit_melee","kit_ranged","is_player","kit"])
+    @option("field", str, choices=["name","stamina","max_stamina","M","A","R","I","P","speed","shift","recoveries","kit_melee","kit_ranged","is_player","kit","Su","HR"])
     @option("value", str)
     async def ds_edit(self, ctx, character: str, field: str, value: str):
         msg, state = await load_state(ctx.channel)
@@ -432,6 +467,17 @@ class DSCog(commands.Cog):
                     entry["kit_ranged"] = list(map(int, data.get("ranged",[0,0,0])))[:3] + [0]*3
                     entry["kit_melee"] = entry["kit_melee"][:3]
                     entry["kit_ranged"] = entry["kit_ranged"][:3]
+            # Update the value handling section to support the new fields:
+            elif field in ["Su", "HR"]:
+                try:
+                    val = int(value)
+                    if val < 0:
+                        await ctx.respond(f"Value for {field} cannot be negative", ephemeral=True)
+                        return
+                    entry[field] = val
+                except ValueError:
+                    await ctx.respond(f"Invalid value for {field}. Must be a number.", ephemeral=True)
+                    return
             else:
                 await ctx.respond(f"Unsupported field: `{field}`", ephemeral=True); return
         except ValueError:
@@ -519,15 +565,23 @@ class DSCog(commands.Cog):
     @option("stat",      str, choices=["Auto","M","A","R","I","P"], default="Auto")
     @option("edges",     int, description="0, 1 (+2), or 2 (tier ↑1)", default=0, min_value=0, max_value=2)
     @option("banes",     int, description="0, 1 (-2), or 2 (tier ↓1)", default=0, min_value=0, max_value=2)
+    @option("surges",    int, description="Number of surges to use (adds stat bonus damage per surge)", default=0, min_value=0)
     @option("target",    str, required=False, description="Target character to apply damage to", autocomplete=_auto_character)
     async def ds_use_ability(self, ctx, character: str, ability: str, mode: str,
-                             stat: str = "Auto", edges: int = 0, banes: int = 0, target: str = None):
+                             stat: str = "Auto", edges: int = 0, banes: int = 0, surges: int = 0, target: str = None):
         # load tracker & character
         msg, state = await load_state(ctx.channel)
         entry = get_char(state, character)
         if not entry:
-            await ctx.respond(f"Character **{character}** not found in this channel’s tracker.", ephemeral=True)
+            await ctx.respond(f"Character **{character}** not found in this channel's tracker.", ephemeral=True)
             return
+
+        # Check surge availability
+        if surges > 0:
+            current_surges = int(entry.get("Su", 0))
+            if surges > current_surges:
+                await ctx.respond(f"You only have {current_surges} surge(s) to use but you selected {surges}.", ephemeral=True)
+                return
 
         ability_data = load_ability(ability)
         if not ability_data:
@@ -553,7 +607,7 @@ class DSCog(commands.Cog):
                 if not candidates:
                     candidates = allowed_stats
             # pick highest stat value from entry
-            chosen_stat_key = max(candidates, key=lambda k: int(entry.get(k, 0) or 0))
+            chosen_stat_key = max(candidates, key=lambda k: int(entry.get(k, 0)))
 
         stat_value = int(entry.get(chosen_stat_key, 0) or 0)
 
@@ -591,11 +645,26 @@ class DSCog(commands.Cog):
         effects = tier_block.get("effects", [])
         rider = tier_block.get("rider") or tier_block.get("rider_text") or None
 
-        # kit bonus
-        kit_array = entry.get("kit_melee" if mode == "Melee" else "kit_ranged", [0, 0, 0])
-        kit_bonus = int(kit_array[tier - 1]) if len(kit_array) >= tier else 0
+        # Calculate surge bonus (highest stat × number of surges)
+        surge_bonus = 0
+        if surges > 0:
+            highest_stat = max(
+                int(entry.get("M", 0) or 0),
+                int(entry.get("A", 0) or 0),
+                int(entry.get("R", 0) or 0),
+                int(entry.get("I", 0) or 0),
+                int(entry.get("P", 0) or 0)
+            )
+            surge_bonus = highest_stat * surges
 
-        total_damage = base_damage + stat_value + kit_bonus
+        # Only add stat and kit bonus if base damage is greater than 0
+        total_damage = base_damage
+        kit_bonus = 0
+        if base_damage > 0:
+            # kit bonus
+            kit_array = entry.get("kit_melee" if mode == "Melee" else "kit_ranged", [0, 0, 0])
+            kit_bonus = int(kit_array[tier - 1]) if len(kit_array) >= tier else 0
+            total_damage = base_damage + stat_value + kit_bonus + surge_bonus
 
         # Setup the tracker embed to render
         color = 0xE74C3C if tier == 1 else (0x2ECC71 if tier == 2 else 0xF1C40F)
@@ -634,33 +703,40 @@ class DSCog(commands.Cog):
 
         e.add_field(
             name="Damage",
-            value=f"{base_damage} + {stat_value} (stat) + {kit_bonus} (kit) = **{total_damage}**",
+            value=(f"{base_damage} + {stat_value} (stat) + {kit_bonus} (kit)" + 
+                   (f" + {surge_bonus} (surges)" if surge_bonus > 0 else "") +
+                   f" = **{total_damage}**" if base_damage > 0
+                  else f"**{total_damage}**" if base_damage == 0 else f"**{base_damage}**"),
             inline=True,
         )
 
+        # Add effects if present
         if effects:
-            e.add_field(name="Effects", value="\n".join(effects), inline=False)
-
+            e.add_field(name="Effects", value="\n".join(f"• {eff}" for eff in effects), inline=False)
+        
+        # Add rider if present
         if rider:
             e.add_field(name="Rider", value=str(rider), inline=False)
 
-        extra_note = ability_data.get("extra_effect")
-        if extra_note:
-            e.add_field(name="Extra", value=extra_note, inline=False)
-
-        e.set_footer(text=f"{mode} • Stat {chosen_stat_key} • Edges {edges} • Banes {banes}")
+        e.set_footer(text=f"{mode} • Stat {chosen_stat_key} • Edges {edges} • Banes {banes}" + 
+                         (f" • Surges {surges}" if surges > 0 else ""))
 
         # apply to target if provided
         if target:
             target_entry = get_char(state, target)
             if not target_entry:
-                await ctx.respond(f"Target **{target}** not found in this channel’s tracker.", ephemeral=True)
+                await ctx.respond(f"Target **{target}** not found in this channel's tracker.", ephemeral=True)
                 return
             prev = int(target_entry.get("stamina", 0))
             new = max(0, prev - int(total_damage))
             target_entry["stamina"] = new
             if "max_stamina" not in target_entry:
                 target_entry["max_stamina"] = prev
+            
+            # Deduct surges from attacker
+            if surges > 0:
+                entry["Su"] = int(entry.get("Su", 0)) - surges
+            
             await save_state(msg, state)
             e.add_field(name="Target", value=f"**{target_entry['name']}** took **{total_damage}** damage — Stamina {new}/{target_entry.get('max_stamina', new)}", inline=False)
             await ctx.respond(embed=e)
@@ -691,3 +767,102 @@ class DSCog(commands.Cog):
         await ctx.respond(embed=e)
         # show updated tracker as followup
         #await ctx.interaction.followup.send(embed=render_embed(state)) # Commented out to reduce spam, as /ds_remove is often used in combat
+
+    # ---------------- Add Effect ----------------
+    @discord.slash_command(description="Add an effect to a character (shows in tracker)")
+    @option("target", str, description="Character to apply effect to", autocomplete=_auto_character)
+    @option("effect", str, description="Effect description (e.g., 'Stunned until round 3')")
+    async def add_effect(self, ctx, target: str, effect: str):
+        msg, state = await load_state(ctx.channel)
+        target_entry = get_char(state, target)
+        
+        if not target_entry:
+            await ctx.respond(f"Target **{target}** not found in this channel's tracker.", ephemeral=True)
+            return
+            
+        # Initialize effects list if needed
+        if 'effects' not in target_entry:
+            target_entry['effects'] = []
+            
+        # Add the new effect
+        target_entry['effects'].append(effect)
+        
+        # Save state and respond
+        await save_state(msg, state)
+        
+        e = discord.Embed(title="✨ Effect Added", color=0x9B59B6)
+        e.add_field(name="Target", value=f"**{target_entry['name']}**", inline=True)
+        e.add_field(name="Effect", value=effect, inline=True)
+        await ctx.respond(embed=e)
+        await ctx.interaction.followup.send(embed=render_embed(state))
+
+    # ---------------- Remove Effect ----------------
+    @discord.slash_command(description="Remove an effect from a character")
+    @option("target", str, description="Character to remove effect from", autocomplete=_auto_character)
+    @option("effect_index", int, description="Effect number to remove (1 = first effect)", min_value=1)
+    async def remove_effect(self, ctx, target: str, effect_index: int):
+        msg, state = await load_state(ctx.channel)
+        target_entry = get_char(state, target)
+        
+        if not target_entry:
+            await ctx.respond(f"Target **{target}** not found in this channel's tracker.", ephemeral=True)
+            return
+            
+        effects = target_entry.get('effects', [])
+        if not effects:
+            await ctx.respond(f"**{target}** has no effects to remove.", ephemeral=True)
+            return
+            
+        try:
+            # Convert to 0-based index
+            idx = effect_index - 1
+            removed = effects.pop(idx)
+            
+            # If no effects left, remove the key entirely
+            if not effects:
+                target_entry.pop('effects', None)
+            
+            await save_state(msg, state)
+            
+            e = discord.Embed(title="🗑️ Effect Removed", color=0xE74C3C)
+            e.add_field(name="Target", value=f"**{target_entry['name']}**", inline=True)
+            e.add_field(name="Removed", value=removed, inline=True)
+            await ctx.respond(embed=e)
+            await ctx.interaction.followup.send(embed=render_embed(state))
+            
+        except IndexError:
+            await ctx.respond(f"Effect #{effect_index} not found. Character has {len(effects)} effect(s).", ephemeral=True)
+
+    # ---------------- Use or Restore Recoveries ----------------
+    @discord.slash_command(description="Use or restore recoveries for a character")
+    @option("character", str, autocomplete=_auto_character)
+    @option("amount", int, description="Amount to change (negative to use, positive to restore)")
+    async def ds_recoveries(self, ctx, character: str, amount: int):
+        msg, state = await load_state(ctx.channel)
+        entry = get_char(state, character)
+        
+        if not entry:
+            await ctx.respond(f"Character **{character}** not found.", ephemeral=True)
+            return
+            
+        current = int(entry.get('recoveries', 0))
+        maximum = int(entry.get('max_recoveries', current))
+        new_value = max(0, min(maximum, current + amount))
+        entry['recoveries'] = new_value
+        
+        if 'max_recoveries' not in entry:
+            entry['max_recoveries'] = maximum
+            
+        await save_state(msg, state)
+        
+        action = "restored" if amount > 0 else "used"
+        e = discord.Embed(
+            title="🔄 Recoveries Updated",
+            color=0x2ECC71 if amount > 0 else 0xE74C3C
+        )
+        e.add_field(name="Character", value=entry['name'], inline=True)
+        e.add_field(name=f"Recoveries {action}", value=str(abs(amount)), inline=True)
+        e.add_field(name="New Total", value=f"{new_value}/{maximum}", inline=False)
+        
+        #await ctx.respond(embed=e)
+        #await ctx.interaction.followup.send(embed=render_embed(state))
