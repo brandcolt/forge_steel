@@ -11,9 +11,10 @@ from helpers import (
 )
 
 class InitCog(commands.Cog):
-    def __init__(self, bot): self.bot = bot
+    def __init__(self, bot):
+        self.bot = bot
 
-        # ---------------- Add Character ----------------
+    # ---------------- Add Character ----------------
     @discord.slash_command(description="Add a Draw Steel character to the tracker")
     @option("name", str)
     @option("stamina", int, description="Stamina")
@@ -309,7 +310,7 @@ class InitCog(commands.Cog):
         if not entry:
             await ctx.respond(f"Character **{character}** not found.", ephemeral=True); return
         entry["status"] = status
-        if status == "done" and state.get("current","").lower() == entry["name"].lower():
+        if status == "done" and (state.get("current") or "").lower() == entry["name"].lower():
             state["current"] = None
         await save_state(msg, state)
         await ctx.respond(f"Set **{entry['name']}** to `{status}`.", ephemeral=False)
@@ -840,29 +841,53 @@ class DSCog(commands.Cog):
     async def ds_recoveries(self, ctx, character: str, amount: int):
         msg, state = await load_state(ctx.channel)
         entry = get_char(state, character)
-        
+
         if not entry:
             await ctx.respond(f"Character **{character}** not found.", ephemeral=True)
             return
-            
-        current = int(entry.get('recoveries', 0))
-        maximum = int(entry.get('max_recoveries', current))
+
+        current = int(entry.get("recoveries", 0))
+        maximum = int(entry.get("max_recoveries", current))
         new_value = max(0, min(maximum, current + amount))
-        entry['recoveries'] = new_value
-        
-        if 'max_recoveries' not in entry:
-            entry['max_recoveries'] = maximum
-            
+        entry["recoveries"] = new_value
+
+        # ensure max_recoveries exists
+        if "max_recoveries" not in entry:
+            entry["max_recoveries"] = maximum
+
+        # Compute actual recoveries used (if any)
+        used_count = max(0, current - new_value)  # number of recoveries actually used
+        healed_amount = 0
+        if used_count > 0:
+            # Each recovery heals floor(max_stamina / 3)
+            max_stam = int(entry.get("max_stamina", entry.get("stamina", 0)))
+            per_recovery = max_stam // 3
+            if per_recovery > 0:
+                prev_stam = int(entry.get("stamina", 0))
+                healed_amount_total = per_recovery * used_count
+                new_stam = min(max_stam, prev_stam + healed_amount_total)
+                entry["stamina"] = new_stam
+                healed_amount = new_stam - prev_stam  # actual healed, which may be smaller than healed_amount_total if capped by max
+
         await save_state(msg, state)
-        
-        action = "restored" if amount > 0 else "used"
-        e = discord.Embed(
-            title="🔄 Recoveries Updated",
-            color=0x2ECC71 if amount > 0 else 0xE74C3C
-        )
-        e.add_field(name="Character", value=entry['name'], inline=True)
-        e.add_field(name=f"Recoveries {action}", value=str(abs(amount)), inline=True)
-        e.add_field(name="New Total", value=f"{new_value}/{maximum}", inline=False)
-        
-        #await ctx.respond(embed=e)
-        #await ctx.interaction.followup.send(embed=render_embed(state))
+
+        # Compute delta (positive => restored recs, negative => used recs)
+        delta = new_value - current
+        if delta > 0:
+            action, color = "restored", 0x2ECC71
+        elif delta < 0:
+            action, color = "used", 0xE74C3C
+        else:
+            action, color = "unchanged", 0x95A5A6
+
+        e = discord.Embed(title="🔄 Recoveries Updated", color=color)
+        e.add_field(name="Character", value=entry["name"], inline=True)
+        e.add_field(name=f"Recoveries {action}", value=str(abs(delta)), inline=True)
+        e.add_field(name="Recoveries (Now)", value=f"{new_value}/{maximum}", inline=True)
+
+        if healed_amount > 0:
+            max_stam = int(entry.get("max_stamina", entry.get("stamina", 0)))
+            e.add_field(name="Healed", value=f"{healed_amount} • Stamina {entry['stamina']}/{max_stam}", inline=False)
+
+        await ctx.respond(embed=e)
+        await ctx.interaction.followup.send(embed=render_embed(state))
