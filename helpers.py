@@ -251,10 +251,8 @@ def render_embed(state):
         chunks.append("")
 
     # Turn Over section
-    if heroes_done or any(True for g in group_order if (
-            [m for m in monsters if m.get("group")==g and m.get("status","ready")=="done"] and
-            not [m for m in monsters if m.get("group")==g and m.get("status","ready")=="ready"]
-        )) or ungrouped_done:
+    any_done = heroes_done or any(m for m in monsters if m.get("status","ready")=="done")
+    if any_done:
         chunks.append("__**Turn Over**__")
 
         if heroes_done:
